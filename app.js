@@ -1,64 +1,66 @@
-(function () {
+(function() {
 'use strict';
 
-angular.module('LunchCheck', [])
 
-.controller('LunchCheckController', LunchCheckController);
-LunchCheckController.$inject = ['$scope'];
+angular.module('ShoppingListCheckOff', [])
+.controller('ToBuyController', ToBuyController)
+.controller('AlreadyBoughtController', AlreadyBoughtController)
+.service('ShoppingListCheckOffService', ShoppingListCheckOffService);
 
-function LunchCheckController($scope) {
-    $scope.response = "";
+ToBuyController.$inject = ['ShoppingListCheckOffService'];
+function ToBuyController(ShoppingListCheckOffService) {
+    var toBuy = this;
+    toBuy.buyItems = ShoppingListCheckOffService.getBuyItems();
 
-    $scope.Check = function() {
+    toBuy.itemName = "";
+    toBuy.quantity = "";
 
-        //Input field into 'menu'
-        var menu = $scope.lunchModel;
+    toBuy.Buy = function(index) {
+        ShoppingListCheckOffService.Buy(index);
+    }
+}
 
-        //Check if the input field has any content
-        if(menu != null) {
-            var splitMenu = menu.split(",");
-            var length = splitMenu.length;
-            //Initialize variables for the "for" loop
-            var array = [];
-            var x = 0;
+AlreadyBoughtController.$inject = ['ShoppingListCheckOffService'];
+function AlreadyBoughtController(ShoppingListCheckOffService) {
+    var alreadyBought = this;
 
-            //For loop that creates a new array with the actual dishes
-            for(var i = 0; i<length; i++) {
-                //Trim the current string
-                var test = splitMenu[i].trim();
-                if(test > 0) {
-                    //If there is content, add the string to 'array'
-                    array[x] = test;
-                    x++;
-                }
-            }
-            //Re-initialize variables
-            length = array.length;
+    alreadyBought.boughtItems = ShoppingListCheckOffService.getBoughtItems();
+}
 
-            //If the dish length is less than or equal to 3, give success message
-            if(length <= 3 && length>0) {
-                $scope.response = "Enjoy!";
-                $scope.color = {"color":"green", "border": "green 2px solid"};
-            }
-            //If the dish length is greater than 3, give "too much" message
-            else if (length > 3) {
-                $scope.response = "Too Much!";
-                $scope.color = {"color":"green", "border": "green 2px solid"};
-            }
-            //If nothing is in dish, give failure message
-            else if(length == 0) {
-                $scope.response = "Please enter data first";
-                $scope.color = {"color":"red", "border": "red 2px solid"};
-            }
-        }
-        //If nothing is in dish, give failure message
-        else{
-            $scope.response = "Please enter data first";
-            $scope.color = {"color":"red", "border": "red 2px solid"};
-        }
+
+function ShoppingListCheckOffService() {
+    var service = this;
+
+    var buyItems = [{itemName: "President", quantity: "1"},
+        {itemName: "Vice President", quantity:"1"},
+        {itemName: "Representatives", quantity:"250"},
+        {itemName: "Senators", quantity:"100"},
+        {itemName: "Supreme Court Justices", quantity: "9"}
+        ];
+
+    var boughtItems = [];
+    
+    service.Buy = function(index){
+        //Add the item to boughtItems[]
+        var item = {
+            itemName: buyItems[index].itemName,
+            quantity: buyItems[index].quantity
+          };
+          boughtItems.push(item);
+
+        //Remove the item from buyItems[]
+        buyItems.splice(index, 1);
     };
 
-};
+    service.getBuyItems = function() {
+        return buyItems;
+    };
 
+    service.getBoughtItems = function() {
+        return boughtItems;
+    };
+
+
+}
 
 })();
